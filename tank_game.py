@@ -1,11 +1,12 @@
 
 import pygame
 import pygame.locals
-from tank import Tank
-from tank2 import Tank2
-from wall import Wall #undistructiable wall
-from projectile import Pojectile
-from dwall import Dwall #distructiable wall
+from entity import Tank, Tank2 ,Wall ,Pojectile ,Dwall
+
+#Wall undistructiable wall
+# #Dwall distructiable wall
+
+
 # def create_text_surface(text):
 #     """This function creates a surface and renders the text argument in it"""
 
@@ -37,9 +38,10 @@ class Game():
         self.tank2 = Tank2(x1,y2,'down')
         self.roundstart = True #game first start flag
         self.start = 0 #start tick
-        self.end = 0 #shot time reference
+        self.end1 = 0 #p1 shot time reference
+        self.end2 = 0 #p2 shot time reference
         self.running = True #running state 
-    def game(self):
+    def game_loop(self):
         pygame.init()
         # This is required to use pygame's font system
         # pygame.font.init()
@@ -73,7 +75,7 @@ class Game():
             xpos2 = self.tank2.rect.x
             ypos2 = self.tank2.rect.y
             
-            
+
             self.key_event_listener()
 
             
@@ -101,14 +103,8 @@ class Game():
                 self.tank.rect.y = ypos
             projectil_groupe.update()
             pygame.display.update()    
-                # if event.type == pygame.MOUSEBUTTONDOWN:
-                #     mx = pygame.mouse.get_pos()[0]
-                #     my = pygame.mouse.get_pos()[1]
-                #     c1=mx-x
-                #     c2=my-y
-                #     con = c1*c2
-                #     if 90 < con < 900:
-                #         running = False                    
+
+
 
     def map_gen(self):
         tilesize = 64
@@ -149,56 +145,51 @@ class Game():
         return [p1, p2]
 
     def key_event_listener(self):
-            for event in pygame.event.get():
-                if event.type == pygame.locals.QUIT:
-                    self.running = False
-                if event.type == pygame.KEYDOWN:
-                    keycode = event.key
-                    keyname = pygame.key.name(keycode)
-                    if keyname == '[8]': # up
-                        self.tank2.rect.y -= 20
-                        self.tank2.set_direction("up")
-                    if keyname == '[5]': # down 
-                        self.tank2.rect.y += 20
-                        self.tank2.set_direction("down")
-                    if keyname == '[4]': # left
-                        self.tank2.rect.x -= 20
-                        self.tank2.set_direction("left")
-                    if keyname == '[6]': # right
-                        self.tank2.rect.x += 20
-                        self.tank2.set_direction("right")
-                    if keyname == '[0]' and self.start-self.end > 2800:
-                        fire = pygame.mixer.Sound("sound/ATgun.ogg")
-                        pygame.mixer.Sound.set_volume(fire,0.1)
-                        pygame.mixer.Sound.play(fire)
-                        self.end = pygame.time.get_ticks()
-                        self.proj = self.tank2.shoot_bullet()
-                        projectil_groupe.add(self.proj)       
-
-                    if keyname == "up":
-                        self.tank.rect.y -= 10
-                        self.tank.set_direction("up")
-                    if keyname == "down":
-                        self.tank.rect.y += 10
-                        self.tank.set_direction("down")
-                    if keyname == "left":
-                        self.tank.rect.x -= 10
-                        self.tank.set_direction("left")
-                    if keyname == "right":
-                        self.tank.rect.x += 10
-                        self.tank.set_direction("right")
-                    
-                    if keyname == "space" and self.start-self.end > 2800:
-                        fire = pygame.mixer.Sound("sound/ATgun.ogg")
-                        pygame.mixer.Sound.set_volume(fire,0.1)
-                        pygame.mixer.Sound.play(fire)
-                        self.end = pygame.time.get_ticks()
-                        self.proj = self.tank.shoot_bullet()
-                        projectil_groupe.add(self.proj)       
-
-
         
+        for event in pygame.event.get():
+            if event.type == pygame.locals.QUIT:
+                self.running = False
 
+        keys = pygame.key.get_pressed()  #checking pressed keys
+        print(keys)
+        if keys[pygame.K_w]:
+            self.tank.rect.y -= 2
+            self.tank.set_direction("up")
+        if keys[pygame.K_s]:
+            self.tank.rect.y += 2
+            self.tank.set_direction("down")
+        if keys[pygame.K_a]:
+            self.tank.rect.x -= 2
+            self.tank.set_direction("left")
+        if keys[pygame.K_d]:
+            self.tank.rect.x += 2
+            self.tank.set_direction("right")
+        if keys[pygame.K_f] and self.start-self.end1 > 2800:
+            fire = pygame.mixer.Sound("sound/ATgun.ogg")
+            pygame.mixer.Sound.set_volume(fire,0.1)
+            pygame.mixer.Sound.play(fire)
+            self.end1 = pygame.time.get_ticks()
+            self.proj = self.tank.shoot_bullet()
+            projectil_groupe.add(self.proj)
 
-if __name__ == "__main__":
-    Game().game()
+        if keys[pygame.K_UP]:
+            self.tank2.rect.y -= 3
+            self.tank2.set_direction("up")
+        if keys[pygame.K_DOWN]:
+            self.tank2.rect.y += 3
+            self.tank2.set_direction("down")
+        if keys[pygame.K_LEFT]:
+            self.tank2.rect.x -= 3
+            self.tank2.set_direction("left")
+        if keys[pygame.K_RIGHT]:
+            self.tank2.rect.x += 3
+            self.tank2.set_direction("right")
+        if keys[pygame.K_RCTRL] and self.start-self.end2 > 2800:
+            fire = pygame.mixer.Sound("sound/ATgun.ogg")
+            pygame.mixer.Sound.set_volume(fire,0.1)
+            pygame.mixer.Sound.play(fire)
+            self.end2 = pygame.time.get_ticks()
+            self.proj = self.tank2.shoot_bullet()
+            projectil_groupe.add(self.proj)       
+                            
+

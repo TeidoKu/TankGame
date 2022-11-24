@@ -1,18 +1,19 @@
 import pygame
-from projectile import Pojectile
+from .projectile import Pojectile
 
-class Tank2(pygame.sprite.Sprite):
+
+class Tank(pygame.sprite.Sprite):
     """This is the main player Class"""
 
     def __init__(self,x = 0,y = 0, direction = None):
         super().__init__()
-        self.original_image_up = pygame.image.load("img/jpup.png")
-        self.original_image_down = pygame.image.load("img/jpdown.png")
-        self.original_image_left = pygame.image.load("img/jpleft.png")
-        self.original_image_right = pygame.image.load("img/jpright.png")
+        self.original_image_up = pygame.image.load("img/t34up.png")
+        self.original_image_down = pygame.image.load("img/t34down.png")
+        self.original_image_left = pygame.image.load("img/t34left.png")
+        self.original_image_right = pygame.image.load("img/t34right.png")
         self.direction = direction
         
-        self.image = pygame.transform.scale(self.original_image_down, (50,100))  # default oriantation for p1 
+        self.image = pygame.transform.scale(self.original_image_up, (50,100))  # default oriantation for p1 
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
