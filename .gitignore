@@ -1,0 +1,4 @@
+#gitignore file that ignore __pycatch__ folder
+
+# .gitignore
+__pycache__/
