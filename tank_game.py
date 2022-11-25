@@ -1,11 +1,10 @@
-
 import pygame
 import pygame.locals
 from entity import Tank, Tank2 ,Wall ,Pojectile ,Dwall
 from score_out import Export_json
 
 #Wall undistructiable wall
-# #Dwall distructiable wall
+#Dwall distructiable wall
 
 
 def create_text_surface(text):
