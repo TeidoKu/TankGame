@@ -1,7 +1,7 @@
 import pygame
 
 class Pojectile(pygame.sprite.Sprite):
-    def __init__(self,x=0,y=0,direction="up"):
+    def __init__(self,x=0,y=20,direction="up"):
         super().__init__()
         if (x != None and y != None):
             self.x = x 

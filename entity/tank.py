@@ -12,15 +12,14 @@ class Tank(pygame.sprite.Sprite):
         self.original_image_left = pygame.image.load("img/t34left.png")
         self.original_image_right = pygame.image.load("img/t34right.png")
         self.direction = direction
+        self.live_status = True
         
         self.image = pygame.transform.scale(self.original_image_up, (50,100))  # default oriantation for p1 
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.rect.center = [self.rect.x,self.rect.y]
-        #change collision box to 64x64
-        self.rect.w = 64
-        self.rect.h = 64
+
 
     def set_direction(self,direction):
         self.direction = direction
@@ -28,31 +27,33 @@ class Tank(pygame.sprite.Sprite):
         if self.direction == "up":
             self.image = pygame.transform.scale(self.original_image_up, (50,100))
             self.rect = self.image.get_rect(topleft=(self.rect.x,self.rect.y))
-            self.rect.w = 64
-            self.rect.h = 64
+            # self.rect.w = 50
+            # self.rect.h = 100
         if self.direction == "down":
             self.image = pygame.transform.scale(self.original_image_down, (50,100))
             self.rect = self.image.get_rect(topleft=(self.rect.x,self.rect.y))
-            self.rect.w = 64
-            self.rect.h = 64
+            # self.rect.w = 50
+            # self.rect.h = 100
         if self.direction == "left":
             self.image = pygame.transform.scale(self.original_image_left, (100,50))
             self.rect = self.image.get_rect(topleft=(self.rect.x,self.rect.y))
-            self.rect.w = 64
-            self.rect.h = 64
+            # self.rect.w = 100
+            # self.rect.h = 50
         if self.direction == "right":
             self.image = pygame.transform.scale(self.original_image_right, (100,50))
             self.rect = self.image.get_rect(topleft=(self.rect.x,self.rect.y))
-            self.rect.w = 64
-            self.rect.h = 64
+            # self.rect.w = 100
+            # self.rect.h = 50
     
     def shoot_bullet(self):
         if self.direction == "up":
-            return Pojectile(self.rect.x + 25, self.rect.y ,self.direction)
+            return Pojectile(self.rect.x + 25 , self.rect.y -10 ,self.direction)
         if self.direction == "down":
-            return Pojectile(self.rect.x + 25, self.rect.y +100 ,self.direction)
+            return Pojectile(self.rect.x + 25 , self.rect.y +110 ,self.direction)
         if self.direction == "left":
-            return Pojectile(self.rect.x , self.rect.y + 25 ,self.direction)
+            return Pojectile(self.rect.x -10 , self.rect.y +25 ,self.direction)
         if self.direction == "right":
-            return Pojectile(self.rect.x + 100, self.rect.y +25,self.direction)
+            return Pojectile(self.rect.x +110, self.rect.y +25 ,self.direction)
 
+    def died(self):
+        self.live_status = False

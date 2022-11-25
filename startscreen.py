@@ -7,23 +7,30 @@ from tank_game import Game
 
 class StartScreen:
     def __init__(self):
-        self.screen = pygame.display.set_mode((800, 600))
-        self.background = pygame.image.load("img/startscreen.jpg")
-        self.background = pygame.transform.scale(self.background, (800, 600))
-        self.button = pygame.image.load("img/dwall.png")
-        self.button = pygame.transform.scale(self.button, (200, 100))
+        self.screen = pygame.display.set_mode((1280, 960))
+        self.background = pygame.image.load("img/background.jpg")
+        self.background = pygame.transform.scale(self.background, (1280, 720))
+        self.button = pygame.image.load("img/start.png")
+        self.button = pygame.transform.scale(self.button, (300, 300))
         self.button_rect = self.button.get_rect()
-        self.button_rect.center = (400, 300)
+        self.button_rect.center = (640, 800)
         self.running = True
 
     def start_screen(self):
+        pygame.mixer.music.load("sound/title.mp3")
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.play()
         while self.running:
-            self.screen.blit(self.background, (0, 0))
+            if pygame.mixer.music.get_busy() == False:
+                pygame.mixer.music.rewind()
+                pygame.mixer.music.play()
+            self.screen.blit(self.background, (0, 150))
             self.screen.blit(self.button, self.button_rect)
             pygame.display.update()
             self.key_event_listener()
             if self.button_rect.collidepoint(pygame.mouse.get_pos()):
                 if pygame.mouse.get_pressed()[0]:
+                    pygame.mixer.music.stop()
                     self.running = False
                     game = Game()
                     game.game_loop()

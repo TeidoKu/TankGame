@@ -2,29 +2,30 @@
 import pygame
 import pygame.locals
 from entity import Tank, Tank2 ,Wall ,Pojectile ,Dwall
+from score_out import Export_json
 
 #Wall undistructiable wall
 # #Dwall distructiable wall
 
 
-# def create_text_surface(text):
-#     """This function creates a surface and renders the text argument in it"""
+def create_text_surface(text):
+    """This function creates a surface and renders the text argument in it"""
 
-#     # Get the default font for the system
-#     default_font = pygame.font.get_default_font()
-#     font = pygame.font.Font(default_font, 24)
-#     text_surface = font.render(text, True, (0, 0, 0))
+    # Get the default font for the system
+    default_font = pygame.font.get_default_font()
+    font = pygame.font.Font(default_font, 24)
+    text_surface = font.render(text, True, (0, 0, 0))
 
-#     return text_surface
+    return text_surface
 
-window = pygame.display.set_mode((1280, 1024))
+window = pygame.display.set_mode((1280, 960))
 wall_group = pygame.sprite.Group()
 dwall_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 player2_group = pygame.sprite.Group()
 projectil_groupe = pygame.sprite.Group()
 
-dwall_arr=[]
+
 
 
 class Game():
@@ -47,25 +48,37 @@ class Game():
         # pygame.font.init()
         
         # Event loop
+
+        pygame.mixer.music.load("sound/bgm.ogg")
         
-        pygame.key.set_repeat(1,100)
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.play()
+
+
+        # pygame.key.set_repeat(1,100)
         player_group.add(self.tank)
         player2_group.add(self.tank2)
         while self.running:
+            if pygame.mixer.music.get_busy() == False:
+                pygame.mixer.music.rewind()
+                pygame.mixer.music.play()
 
-            self.start = pygame.time.get_ticks()
-            if self.start < 1000 and self.roundstart:
+            self.start = pygame.time.get_ticks() #start time tick
+            timetext = create_text_surface(f"{str(self.start/1000)} sec")
+            timetext.get_rect().center = (1000, -20)
+            if self.roundstart:
                 self.roundstart = False
                 load = pygame.mixer.Sound("sound/T34reloadonly.ogg")
                 pygame.mixer.Sound.set_volume(load,0.1)
                 pygame.mixer.Sound.play(load)
-            window = pygame.display.set_mode((1280, 1024))
+            window = pygame.display.set_mode((1280, 960))
             window.fill((255, 255, 255))        
             projectil_groupe.draw(window)
             player_group.draw(window)
             player2_group.draw(window)
             dwall_group.draw(window)
             wall_group.draw(window)
+            window.blit(timetext, (1110, 30))
 
             
             #record self.tank original cordinats 
@@ -79,21 +92,44 @@ class Game():
             self.key_event_listener()
 
             
+            #end game 
+            if pygame.sprite.spritecollide(self.proj, player_group, dokill=True):
+                self.tank.live_status = False
+                export = {'winer':'p2', 'time':self.start/1000}
+                Export_json(export)
+                self.running = False
+
+            if pygame.sprite.spritecollide(self.proj, player2_group, dokill=True):
+                self.tank2.live_status = False
+                export = {'winer':'p1', 'time':self.start/1000}
+                Export_json(export)
+                self.running = False
+
+
+            
+            
+            
+            # projectil collision with with wall
+            if pygame.sprite.spritecollide(self.proj, wall_group, dokill=False):
+                pygame.sprite.Sprite.kill(self.proj)
+                self.proj.rect.x = 0
+                self.proj.rect.y = 20
+            if pygame.sprite.spritecollide(self.proj, dwall_group, dokill=True):
+                pygame.sprite.Sprite.kill(self.proj)
+                self.proj.rect.x = 0
+                self.proj.rect.y = 20
+            
+            # wall collision detection
+
             if pygame.sprite.spritecollide(self.tank2, dwall_group, dokill=False):
                 self.tank2.rect.x = xpos2
                 self.tank2.rect.y = ypos2
-                print("col")
+                
             if pygame.sprite.spritecollide(self.tank2, wall_group, dokill=False):
                 self.tank2.rect.x = xpos2
                 self.tank2.rect.y = ypos2   
-                print("col")
+                
 
-            if pygame.sprite.spritecollide(self.proj, wall_group, dokill=False):
-                projectil_groupe.remove(self.proj)
-            
-            if pygame.sprite.spritecollide(self.proj, dwall_group, dokill=True):
-                projectil_groupe.remove(self.proj)
-            
             if pygame.sprite.spritecollide(self.tank, dwall_group, dokill=False):
                 self.tank.rect.x = xpos
                 self.tank.rect.y = ypos
@@ -110,21 +146,20 @@ class Game():
         tilesize = 64
         w_map = [
         ['x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x'],
+        ['x',' ',' ',' ',' ',' ',' ',' ',' ','p2',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
         ['x',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
-        ['x',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
-        ['x','d',' ',' ',' ',' ',' ',' ','p2',' ',' ',' ',' ',' ',' ',' ',' ',' ','d','x'],
+        ['x','d',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','d','x'],
         ['x',' ','d',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','d',' ','x'],
-        ['x',' ','d',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','d',' ',' ','x'],
-        ['x',' ',' ','d','d','d','d','d','d','d','d','d','d','d','d','d',' ',' ',' ','x'],
-        ['x',' ',' ','d','d','d','d','d','d','d','d','d','d','d','d','d',' ',' ',' ','x'],
-        ['x',' ','d',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','d',' ',' ','x'],
+        ['x',' ',' ','d',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','d',' ',' ','x'],
+        ['x',' ',' ',' ','d','d','d','d','d','d','d','d','d','d','d','d',' ',' ',' ','x'],
+        ['x',' ',' ',' ','d','d','d','d','d','d','d','d','d','d','d','d',' ',' ',' ','x'],
+        ['x',' ',' ','d',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','d',' ',' ','x'],
         ['x',' ','d',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','d',' ','x'],
         ['x','d',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','d','x'],
         ['x',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
         ['x',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
-        ['x',' ',' ',' ',' ',' ',' ',' ','p1',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
-        ['x',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
-        ['x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x'],
+        ['x',' ',' ',' ',' ',' ',' ',' ',' ','p1',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
+        ['x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x']
         ]
         for row_index,row in enumerate(w_map):
             for col_index, col in enumerate(row):
@@ -136,7 +171,6 @@ class Game():
                 if col == 'd':
                     new_dwall = Dwall(x,y)
                     dwall_group.add(new_dwall)
-                    dwall_arr.append(new_dwall)
                 if col == 'p1':
                     p1 = (x,y)
                 if col =='p2':
@@ -151,45 +185,45 @@ class Game():
                 self.running = False
 
         keys = pygame.key.get_pressed()  #checking pressed keys
-        print(keys)
-        if keys[pygame.K_w]:
-            self.tank.rect.y -= 2
-            self.tank.set_direction("up")
-        if keys[pygame.K_s]:
-            self.tank.rect.y += 2
-            self.tank.set_direction("down")
-        if keys[pygame.K_a]:
-            self.tank.rect.x -= 2
-            self.tank.set_direction("left")
-        if keys[pygame.K_d]:
-            self.tank.rect.x += 2
-            self.tank.set_direction("right")
-        if keys[pygame.K_f] and self.start-self.end1 > 2800:
-            fire = pygame.mixer.Sound("sound/ATgun.ogg")
-            pygame.mixer.Sound.set_volume(fire,0.1)
-            pygame.mixer.Sound.play(fire)
-            self.end1 = pygame.time.get_ticks()
-            self.proj = self.tank.shoot_bullet()
-            projectil_groupe.add(self.proj)
+        if self.tank2.live_status == True: 
+            if keys[pygame.K_w]:
+                self.tank.rect.y -= 2
+                self.tank.set_direction("up")
+            elif keys[pygame.K_s]:
+                self.tank.rect.y += 2
+                self.tank.set_direction("down")
+            elif keys[pygame.K_a]:
+                self.tank.rect.x -= 2
+                self.tank.set_direction("left")
+            elif keys[pygame.K_d]:
+                self.tank.rect.x += 2
+                self.tank.set_direction("right")
+            elif keys[pygame.K_f] and self.start-self.end1 > 2800:
+                fire = pygame.mixer.Sound("sound/ATgun.ogg")
+                pygame.mixer.Sound.set_volume(fire,0.1)
+                pygame.mixer.Sound.play(fire)
+                self.end1 = pygame.time.get_ticks()
+                self.proj = self.tank.shoot_bullet()
+                projectil_groupe.add(self.proj)
 
-        if keys[pygame.K_UP]:
-            self.tank2.rect.y -= 3
-            self.tank2.set_direction("up")
-        if keys[pygame.K_DOWN]:
-            self.tank2.rect.y += 3
-            self.tank2.set_direction("down")
-        if keys[pygame.K_LEFT]:
-            self.tank2.rect.x -= 3
-            self.tank2.set_direction("left")
-        if keys[pygame.K_RIGHT]:
-            self.tank2.rect.x += 3
-            self.tank2.set_direction("right")
-        if keys[pygame.K_RCTRL] and self.start-self.end2 > 2800:
-            fire = pygame.mixer.Sound("sound/ATgun.ogg")
-            pygame.mixer.Sound.set_volume(fire,0.1)
-            pygame.mixer.Sound.play(fire)
-            self.end2 = pygame.time.get_ticks()
-            self.proj = self.tank2.shoot_bullet()
-            projectil_groupe.add(self.proj)       
-                            
-
+        if self.tank.live_status == True:
+            if keys[pygame.K_UP]:
+                self.tank2.rect.y -= 2
+                self.tank2.set_direction("up")
+            elif keys[pygame.K_DOWN]:
+                self.tank2.rect.y += 2
+                self.tank2.set_direction("down")
+            elif keys[pygame.K_LEFT]:
+                self.tank2.rect.x -= 2
+                self.tank2.set_direction("left")
+            elif keys[pygame.K_RIGHT]:
+                self.tank2.rect.x += 2
+                self.tank2.set_direction("right")
+            elif keys[pygame.K_RCTRL] and self.start-self.end2 > 2800:
+                fire = pygame.mixer.Sound("sound/ATgun.ogg")
+                pygame.mixer.Sound.set_volume(fire,0.1)
+                pygame.mixer.Sound.play(fire)
+                self.end2 = pygame.time.get_ticks()
+                self.proj = self.tank2.shoot_bullet()
+                projectil_groupe.add(self.proj)       
+                                
