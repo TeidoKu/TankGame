@@ -2,20 +2,10 @@ import pygame
 import pygame.locals
 from entity import Tank, Tank2 ,Wall ,Pojectile ,Dwall
 from score_out import Export_json
-
+from helper import TextSurface
+from endscreen import EndScreen
 #Wall undistructiable wall
 #Dwall distructiable wall
-
-
-def create_text_surface(text):
-    """This function creates a surface and renders the text argument in it"""
-
-    # Get the default font for the system
-    default_font = pygame.font.get_default_font()
-    font = pygame.font.Font(default_font, 24)
-    text_surface = font.render(text, True, (0, 0, 0))
-
-    return text_surface
 
 window = pygame.display.set_mode((1280, 960))
 wall_group = pygame.sprite.Group()
@@ -26,9 +16,9 @@ projectil_groupe = pygame.sprite.Group()
 
 
 
-
+"""Main game class"""
 class Game():
-    """Main program"""
+    
     def __init__(self):
         self.proj = Pojectile()
         player_cord = self.map_gen()
@@ -63,7 +53,8 @@ class Game():
                 pygame.mixer.music.play()
 
             self.start = pygame.time.get_ticks() #start time tick
-            timetext = create_text_surface(f"{str(self.start/1000)} sec")
+            #display time in seconds
+            timetext = TextSurface().create_text_surface( f"{str(self.start/1000)} sec")
             timetext.get_rect().center = (1000, -20)
             if self.roundstart:
                 self.roundstart = False
@@ -77,6 +68,7 @@ class Game():
             player2_group.draw(window)
             dwall_group.draw(window)
             wall_group.draw(window)
+            #blit time text on posistion
             window.blit(timetext, (1110, 30))
 
             
@@ -94,19 +86,17 @@ class Game():
             #end game 
             if pygame.sprite.spritecollide(self.proj, player_group, dokill=True):
                 self.tank.live_status = False
-                export = {'winer':'p2', 'time':self.start/1000}
-                Export_json(export)
+                # export = {'winer':'p2', 'time':self.start/1000}
+                # Export_json(export)
+                EndScreen('P2',self.start/1000)
                 self.running = False
 
             if pygame.sprite.spritecollide(self.proj, player2_group, dokill=True):
                 self.tank2.live_status = False
-                export = {'winer':'p1', 'time':self.start/1000}
-                Export_json(export)
+                # export = {'winer':'p1', 'time':self.start/1000}
+                # Export_json(export)
+                EndScreen('P1',self.start/1000)
                 self.running = False
-
-
-            
-            
             
             # projectil collision with with wall
             if pygame.sprite.spritecollide(self.proj, wall_group, dokill=False):
@@ -139,23 +129,31 @@ class Game():
             projectil_groupe.update()
             pygame.display.update()    
 
-
-
     def map_gen(self):
+        """
+        Map generator function
+        This function generate map and return player cordinats
+        This function also generate wall and distructiable wall
+        it devide the map as 16*12 grid each grid is 64*64
+        x for non distructable wall
+        d for distructable wall
+        p2 for player 2 tank
+        p1 for player 1 tank
+        """
         tilesize = 64
         w_map = [
         ['x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x'],
         ['x',' ',' ',' ',' ',' ',' ',' ',' ','p2',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
         ['x',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
-        ['x','d',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','d','x'],
-        ['x',' ','d',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','d',' ','x'],
+        ['x','d',' ',' ',' ',' ',' ','d','d',' ','d','d',' ',' ',' ',' ',' ',' ','d','x'],
+        ['x',' ','d',' ',' ',' ',' ',' ','d',' ','d',' ',' ',' ',' ',' ',' ','d',' ','x'],
         ['x',' ',' ','d',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','d',' ',' ','x'],
         ['x',' ',' ',' ','d','d','d','d','d','d','d','d','d','d','d','d',' ',' ',' ','x'],
+        ['x','x','d','x','d','d','d','d','x','x','x','d','d','d','d','d','x','d','x','x'],
         ['x',' ',' ',' ','d','d','d','d','d','d','d','d','d','d','d','d',' ',' ',' ','x'],
         ['x',' ',' ','d',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','d',' ',' ','x'],
-        ['x',' ','d',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','d',' ','x'],
-        ['x','d',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','d','x'],
-        ['x',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
+        ['x',' ','d',' ',' ',' ',' ',' ','d',' ','d',' ',' ',' ',' ',' ',' ','d',' ','x'],
+        ['x','d',' ',' ',' ',' ',' ','d','d',' ','d','d',' ',' ',' ',' ',' ',' ','d','x'],
         ['x',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
         ['x',' ',' ',' ',' ',' ',' ',' ',' ','p1',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
         ['x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x']
@@ -225,4 +223,4 @@ class Game():
                 self.end2 = pygame.time.get_ticks()
                 self.proj = self.tank2.shoot_bullet()
                 projectil_groupe.add(self.proj)       
-                                
+
