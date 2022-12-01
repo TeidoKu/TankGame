@@ -17,6 +17,7 @@ class StartScreen:
         self.running = True
 
     def start_screen(self):
+        pygame.init()
         pygame.mixer.music.load("sound/title.mp3")
         pygame.mixer.music.set_volume(0.1)
         pygame.mixer.music.play()
@@ -33,7 +34,7 @@ class StartScreen:
                     pygame.mixer.music.stop()
                     self.running = False
                     game = Game()
-                    game.game_loop()
+                    game.game_loop(pygame.time.get_ticks())
                     
             
 
@@ -47,10 +48,10 @@ class StartScreen:
                 if self.button_rect.collidepoint(event.pos):
                     self.running = False
 
-if __name__ == "__main__":
-    pygame.init()
-    start_screen = StartScreen()
-    start_screen.start_screen()
+# if __name__ == "__main__":
+#     pygame.init()
+#     start_screen = StartScreen()
+#     start_screen.start_screen()
     #when button is clicked, start tank_game.py
     
 

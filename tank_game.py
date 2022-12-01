@@ -1,7 +1,6 @@
 import pygame
 import pygame.locals
 from entity import Tank, Tank2 ,Wall ,Pojectile ,Dwall
-from score_out import Export_json
 from helper import TextSurface
 from endscreen import EndScreen
 #Wall undistructiable wall
@@ -20,22 +19,43 @@ projectil_groupe = pygame.sprite.Group()
 class Game():
     
     def __init__(self):
-        self.proj = Pojectile()
-        player_cord = self.map_gen()
-        x,y = player_cord[0]
-        x1,y2 = player_cord[1]
-        self.tank = Tank(x,y,'up')
+
+        """
+        Initialize all game variables
+        Player cordination is generated from map generator
+        assign player cordiats using unpacking
+
+        Initialize player position and direction
+        """
+        self.proj = Pojectile() 
+        player_cord = self.map_gen() # get player cordinats from map generator
+        x,y = player_cord[0] # assign player cordinats to x and y using unpacking
+        x1,y2 = player_cord[1] 
+        self.tank = Tank(x,y,'up') 
         self.tank2 = Tank2(x1,y2,'down')
         self.roundstart = True #game first start flag
-        self.start = 0 #start tick
+        self.start = 0
+        
         self.end1 = 0 #p1 shot time reference
         self.end2 = 0 #p2 shot time reference
-        self.running = True #running state 
-    def game_loop(self):
+        self.running = True #running state
+
+    def tick_to_sec (self, tick):
+        """
+        This function convert tick to second
+        """
+        return tick/1000
+
+    def game_loop(self,Start_tick):
+        """
+        main game loop
+        recive start tick from start screen
+        plays music when game starts
+        initialize game time using current_tick - start_tick
+        """
         pygame.init()
         # This is required to use pygame's font system
         # pygame.font.init()
-        
         # Event loop
 
         pygame.mixer.music.load("sound/bgm.ogg")
@@ -43,33 +63,38 @@ class Game():
         pygame.mixer.music.set_volume(0.1)
         pygame.mixer.music.play()
 
-
         # pygame.key.set_repeat(1,100)
         player_group.add(self.tank)
         player2_group.add(self.tank2)
+        
         while self.running:
+            window = pygame.display.set_mode((1280, 960))
+            window.fill((255, 255, 255)) 
             if pygame.mixer.music.get_busy() == False:
                 pygame.mixer.music.rewind()
                 pygame.mixer.music.play()
 
-            self.start = pygame.time.get_ticks() #start time tick
+            #start time tick
+            
             #display time in seconds
-            timetext = TextSurface().create_text_surface( f"{str(self.start/1000)} sec")
-            timetext.get_rect().center = (1000, -20)
             if self.roundstart:
                 self.roundstart = False
                 load = pygame.mixer.Sound("sound/T34reloadonly.ogg")
                 pygame.mixer.Sound.set_volume(load,0.1)
                 pygame.mixer.Sound.play(load)
-            window = pygame.display.set_mode((1280, 960))
-            window.fill((255, 255, 255))        
+                
+
+            self.start = pygame.time.get_ticks() - Start_tick
             projectil_groupe.draw(window)
             player_group.draw(window)
             player2_group.draw(window)
             dwall_group.draw(window)
             wall_group.draw(window)
             #blit time text on posistion
+            timetext = TextSurface().create_text_surface( f"{str(self.tick_to_sec(self.start))} sec")
+            timetext.get_rect().center = (1000, -20)
             window.blit(timetext, (1110, 30))
+            
 
             
             #record self.tank original cordinats 
@@ -80,22 +105,19 @@ class Game():
             ypos2 = self.tank2.rect.y
             
 
-            self.key_event_listener()
+            self.key_event_listener(Start_tick)
 
             
             #end game 
             if pygame.sprite.spritecollide(self.proj, player_group, dokill=True):
                 self.tank.live_status = False
-                # export = {'winer':'p2', 'time':self.start/1000}
-                # Export_json(export)
-                EndScreen('P2',self.start/1000)
+                EndScreen('P2',self.tick_to_sec(self.start))
                 self.running = False
 
             if pygame.sprite.spritecollide(self.proj, player2_group, dokill=True):
                 self.tank2.live_status = False
-                # export = {'winer':'p1', 'time':self.start/1000}
-                # Export_json(export)
-                EndScreen('P1',self.start/1000)
+                EndScreen('P1',self.tick_to_sec(self.start))
+                
                 self.running = False
             
             # projectil collision with with wall
@@ -175,7 +197,7 @@ class Game():
         
         return [p1, p2]
 
-    def key_event_listener(self):
+    def key_event_listener(self,Start_tick):
         
         for event in pygame.event.get():
             if event.type == pygame.locals.QUIT:
@@ -199,7 +221,7 @@ class Game():
                 fire = pygame.mixer.Sound("sound/ATgun.ogg")
                 pygame.mixer.Sound.set_volume(fire,0.1)
                 pygame.mixer.Sound.play(fire)
-                self.end1 = pygame.time.get_ticks()
+                self.end1 = pygame.time.get_ticks() - Start_tick
                 self.proj = self.tank.shoot_bullet()
                 projectil_groupe.add(self.proj)
 
@@ -220,7 +242,8 @@ class Game():
                 fire = pygame.mixer.Sound("sound/ATgun.ogg")
                 pygame.mixer.Sound.set_volume(fire,0.1)
                 pygame.mixer.Sound.play(fire)
-                self.end2 = pygame.time.get_ticks()
+                self.end2 = pygame.time.get_ticks() - Start_tick
+            
                 self.proj = self.tank2.shoot_bullet()
                 projectil_groupe.add(self.proj)       
 

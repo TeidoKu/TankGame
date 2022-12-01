@@ -2,7 +2,7 @@ import pygame
 import pygame.locals
 import sys
 from helper import TextSurface
-from score_out import Export_json
+from helper import Export_json
 
 class EndScreen():
     def __init__(self,winerP,endtime) -> None:
