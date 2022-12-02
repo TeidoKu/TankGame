@@ -65,7 +65,7 @@ class Game():
 
         # pygame.key.set_repeat(1,100)
         player_group.add(self.tank)
-        player2_group.add(self.tank2)
+        player2_group.add(self.tank2)  
         
         while self.running:
             window = pygame.display.set_mode((1280, 960))
